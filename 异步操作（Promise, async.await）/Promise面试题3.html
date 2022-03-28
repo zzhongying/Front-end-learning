@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+<script>
+    setTimeout(()=>{
+        console.log("0")
+    },0)
+
+    //直接输出：1 7 2 3
+    // 宏：0
+    // 微： 8 4 6 5
+    // 输出4后，结果是undefined，下一个then不能立即执行，但是已经将输出5其放在缓存中了，此时输出2的回调函数
+    // 已经全部运行完毕，调用then方法，输出6
+
+    new Promise((resolve ,reject)=>{
+        console.log("1")
+        resolve()
+    }).then(()=>{
+        console.log("2")
+        new Promise((resolve,reject)=>{
+            console.log("3")
+            resolve()
+        }).then(()=>{
+            console.log("4")
+        }).then(()=>{
+            console.log("5")
+        })
+    }).then(()=>{     //then方法是同步调用，then方法中的onResolve和onReject回调函数是异步执行，
+        // 所以5没有进入微队列，6可以进入微队列
+        console.log("6")
+    })
+
+    new Promise((resolve ,reject)=>{
+        console.log("7")
+        resolve()
+    }).then(()=>{
+        console.log("8")
+    })
+
+    //输出顺序：1 7 2 3 8 6 4 5 0
+    //实际：1 7 2 3 8 4 6 5 0
+</script>
+</html>
