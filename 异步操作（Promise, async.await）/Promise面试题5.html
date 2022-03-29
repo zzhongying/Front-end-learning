@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Promise面试题5</title>
+</head>
+<body>
+
+</body>
+<script>
+
+    new Promise((resolve, reject) => {
+        console.log("外部promise");
+        resolve();
+    }).then(() => {
+        console.log("外部第一个then");
+        let p = new Promise((resolve, reject) => {
+            console.log("内部promise");
+            resolve();
+        })
+        p.then(() => {                                 // new Promise的两个p.then是同步执行，所以会同步注册
+            console.log("内部第一个then");
+        })
+        p.then(() => {
+            console.log("内部第二个then");
+        });
+    }).then(() => {
+        console.log("外部第二个then");
+    });
+
+    // 输出顺序：外部promise  外部第一个then  内部promise  内部第一个then   内部第二个then   外部第二个then
+
+    let p = new Promise((resolve, reject) => {
+        console.log("外部promise");
+        resolve();
+    })
+    p.then(() => {
+        console.log("外部第一个then");
+        new Promise((resolve, reject) => {
+            console.log("内部promise");
+            resolve();
+        })
+            .then(() => {
+                console.log("内部第一个then");
+            })
+            .then(() => {
+                console.log("内部第一个then");
+            });
+    })
+    p.then(() => {
+        console.log("外部第二个then");
+    });
+
+    //输出顺序：  外部promise  外部第一个then 内部promise 外部第二个then  内部第一个then  内部第一个then
+
+</script>
+</html>

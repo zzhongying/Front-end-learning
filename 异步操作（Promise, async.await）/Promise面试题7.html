@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Promise面试题7</title>
+</head>
+<body>
+
+</body>
+<script>
+    setTimeout(() => {
+        console.log('异步1任务time1');
+        new Promise(function (resolve, reject) {
+            console.log('异步1宏任务promise');
+            setTimeout(() => {
+                console.log('异步1任务time2');
+            }, 0);
+            resolve();
+        }).then(function () {
+            console.log('异步1微任务then')
+        })
+    }, 0);
+
+    console.log('主线程宏任务');
+
+    setTimeout(() => {
+        console.log('异步2任务time2');
+
+    }, 0);
+
+    new Promise(function (resolve, reject) {
+        console.log('宏任务promise');
+        // reject();
+        resolve();
+    }).then(function () {
+        console.log('微任务then')
+    }).catch(function () {
+        console.log('微任务catch')      // resolved状态，不执行catch函数
+    })
+
+    console.log('主线程宏任务2');
+
+
+    //输出顺序：主线程宏任务 宏任务promise 主线程宏任务2 微任务then  异步1任务time1  异步1宏任务promise 异步1微任务then   异步2任务time2   异步1任务time2
+
+
+</script>
+</html>
