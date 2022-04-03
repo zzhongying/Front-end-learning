@@ -38,16 +38,21 @@
         .then(d=>console.log(d))
 
     //axios的使用,也返回一个Promise对象
+    // axios默认是json类型的提交
     axios({
-        url:'http://XXX:999',
+        url:"http://localhost:99?x=1",
         method:"POST",
-        data:{a:12},   //某认为json
-
-        //以表单形式提交
-        headers:{'content-type':"application/x-www/form-urlencoded"}
-    }).then(res=>{
-        console.log(res.data)
+        data:{a:12}
     })
+        .then(res=>console.log(res.data))
+    // 如果想改成form则需要修改headers和data格式
+    axios({
+        url:"http://localhost:99?x=1",
+        method:"POST",
+        headers:{"Content-Type":"application/x-www-form-urlencoded"},
+        data:"a=12&b=23"
+    })
+        .then(res=>console.log(res.data))
 
 </script>
 </html>
