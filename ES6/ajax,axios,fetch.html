@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ajax_axios_fetch</title>
+</head>
+<body>
+
+</body>
+<script>
+    //ajax的使用，提交类型为XHR
+    $.ajax({
+        method:'POST',
+        data:{a:10},  //post默认填充
+        headers:{'Content-Type':'application/json'}, //提交数据的格式
+        url:'http://XXX' , //数据接口
+        success:function (data) {
+            console.log(data)
+        }
+    })
+
+    //fetch的使用，现代浏览器自带
+    fetch("http://XXX:8080",{
+        method:"POST",
+        headers:{"content-type":"application/x-www-form-urlencoded"},
+        body:"this is test",  //不能用data对象
+    })   //返回一个Promise对象
+    .then(res=>res.json())
+    .then(d=>console.log(d))
+
+    //fetch提交参数的几种方式,URL后添加表达式
+    fetch("http://XXX:8080?a=12",{
+        method:"POST",
+        headers:{"content-type":"application/json"},
+        body:JSON.stringify({a:12}),  //不能用data对象
+    })   //返回一个Promise对象
+        .then(res=>res.json())
+        .then(d=>console.log(d))
+
+    //axios的使用,也返回一个Promise对象
+    axios({
+        url:'http://XXX:999',
+        method:"POST",
+        data:{a:12},   //某认为json
+
+        //以表单形式提交
+        headers:{'content-type':"application/x-www/form-urlencoded"}
+    }).then(res=>{
+        console.log(res.data)
+    })
+
+</script>
+</html>

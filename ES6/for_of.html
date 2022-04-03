@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>for_of的使用</title>
+</head>
+<body>
+
+</body>
+<script>
+    var obj = {
+        0:'one',
+        1:'two',
+        length: 2
+    };
+
+    Obj = Array.from(obj)
+    console.log(Obj)
+
+    for( var k  in Obj){
+        console.log(k)  //0/1
+    }
+    console.log('-------------------------------------')
+    for( var i of Obj){
+        console.log(i)  // one /two
+    }
+    console.log('-------------------------------------')
+    for(var j of obj){
+        console.log(j)  //obj不是iterator，所以无法被遍历
+    }
+
+    //若想obj使用for... of属性，需要给其添加symbol.iterator属性
+    obj[Symbol.iterator] = function(){
+        var keys = Object.keys(this);
+        var count = 0;
+        return {
+            next(){
+                if(count<keys.length){
+                    return {value: obj[keys[count++]],done:false};
+                }else{
+                    return {value:undefined,done:true};
+                }
+            }
+        }
+    };
+
+    for(var y of obj){
+        console.log(y);
+    }
+</script>
+</html>
