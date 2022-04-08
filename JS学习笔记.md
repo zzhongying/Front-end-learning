@@ -2,6 +2,35 @@
 
 写在前面：本文档主要用于记录在学习JavaScript过程中遇到的重要知识点和各类通俗易懂的案例
 
+## 零、基础知识
+
+#### 1.强语言与弱语言
+
+- **强类型语言**：强类型语言也称为强类型定义语言，是一种总是强制类型定义的语言，要求变量的使用要严格符合定义，所有变量都必须先定义后使用。Java和C++等语言都是强制类型定义的，也就是说，一旦一个变量被指定了某个数据类型，如果不经过强制转换，那么它就永远是这个数据类型了。例如你有一个整数，如果不显式地进行转换，你不能将其视为一个字符串。
+- **弱类型语言**：弱类型语言也称为弱类型定义语言，与强类型定义相反。JavaScript语言就属于弱类型语言。简单理解就是一种变量类型可以被忽略的语言。比如JavaScript是弱类型定义的，在JavaScript中就可以将字符串'12'和整数3进行连接得到字符串'123'，在相加的时候会进行强制类型转换。
+
+#### 2.解释性语言与编译性语言
+
+**（1）解释型语言**
+
+**使用专门的解释器对源程序逐行解释成特定平台的机器码并立即执行**。是代码在执行时才被解释器一行行动态翻译和执行，而不是在执行之前就完成翻译。解释型语言不需要事先编译，其直接将源代码解释成机器码并立即执行，所以只要某一平台提供了相应的解释器即可运行该程序。其特点总结如下
+
+- 解释型语言每次运行都需要将源代码解释称机器码并执行，效率较低；
+- 只要平台提供相应的解释器，就可以运行源代码，所以可以方便源程序移植；
+- JavaScript、Python等属于解释型语言。
+
+**（2）编译型语言**
+
+使用专门的编译器，针对特定的平台，将高级语言源代码一次性的编译成可被该平台硬件执行的机器码，并包装成该平台所能识别的可执行性程序的格式。在编译型语言写的程序执行之前，需要一个专门的**编译过程**，把源代码编译成机器语言的文件，如exe格式的文件，以后要再运行时，直接使用编译结果即可，如直接运行exe文件。因为只需编译一次，以后运行时不需要编译，所以编译型语言执行效率高。其特点总结如下：
+
+- 一次性的编译成平台相关的机器语言文件，运行时脱离开发环境，运行效率高；
+- 与特定平台相关，一般无法移植到其他平台；
+- C、C++等属于编译型语言。
+
+两者对比：强类型语言在速度上可能略逊色于弱类型语言，但是强类型语言带来的严谨性可以有效地帮助避免许多错误。
+
+**两者主要区别在于：**前者源程序编译后即可在该平台运行，后者是在运行期间才编译。所以前者运行速度快，后者跨平台性好。
+
 ## 一、数据类型
 
 #### 1. JavaScript中的变量
@@ -475,6 +504,30 @@ ToPrimitive(obj,type)
 
 #### 16.object.assign和扩展运算法是深拷贝还是浅拷贝，两者区别（待补充）
 
+两者都是浅拷贝
+
+- ES6专门为合并对象提供了Object.assign()方法，其接收的第一个参数作为目标对象，后面的所有参数作为源对象。然后把所有的源对象合并到目标对象中。它会修改了一个对象，因此会触发 ES6 setter。
+
+  ```js
+  let outObj = {
+    inObj: {a: 1, b: 2}
+  }
+  let newObj = Object.assign({}, outObj)
+  newObj.inObj.a = 2
+  console.log(outObj) // {inObj: {a: 2, b: 2}}
+  ```
+
+- 扩展操作符（…）使用它时，数组或对象中的每一个值都会被拷贝到一个新的数组或对象中。它不复制继承的属性或类的属性，但是它会复制ES6的 symbols 属性。
+
+```js
+let outObj = {
+  inObj: {a: 1, b: 2}
+}
+let newObj = {...outObj}
+newObj.inObj.a = 2
+console.log(outObj) // {inObj: {a: 2, b: 2}}
+```
+
 #### 17.如何判断一个对象是空对象
 
 - 使用JSON自带的.stringify方法来判断：
@@ -492,6 +545,12 @@ if(Object.keys(Obj).length < 0){
     console.log('空对象');
 }
 ```
+
+#### 18.如何判断一个对象是否属于某个类？
+
+- 第一种方式，使用 instanceof 运算符来判断构造函数的 prototype 属性是否出现在对象的原型链中的任何位置。（`instanceof`**只能正确判断引用数据类型**，而不能判断基本数据类型。）
+- 第二种方式，通过对象的 constructor 属性来判断，对象的 constructor 属性指向该对象的构造函数，但是这种方式不是很安全，因为 constructor 属性可以被改写。
+- 第三种方式，如果需要判断的是某个内置的引用类型的话，可以使用 Object.prototype.toString() 方法来打印对象的[[Class]] 属性来进行判断。
 
 ## 二、常见的DOM操作有哪些
 
@@ -867,7 +926,198 @@ console.log(arr)
 - 数组插入方法 splice()，影响原数组
 - 查找特定项的索引的方法，indexOf() (该方法接受一个数据，返回该数据在数组中的从左往右第一个索引)和 lastIndexOf() (从右往左)
 - 迭代方法 every()、some()、filter()、map() 和 forEach() 方法
+
+> map和forEach都是用来遍历数组的，两者区别如下：
+>
+> - forEach()方法会针对每一个元素执行提供的函数，对数据的操作会改变原数组，该方法没有返回值；
+> - map()方法不会改变原数组的值，返回一个新数组，新数组中的值为原数组调用函数处理之后的值
+>
+> ```js
+>   let array =[1,2,3,4,5,6]
+>     array.forEach((value,key)=>{
+>         return array[key] = value * key
+>     })
+> 
+>     console.log(array)  //[0, 2, 6, 12, 20, 30]
+>     let array2 =[1,2,3,4,5,6]
+>     let array3=array2.map(value=>{
+>         return value * value
+>     })
+>     console.log(array2)  //[1,2,3,4,5,6] 原函数没变
+>     console.log(array3)  //[1, 4, 9, 16, 25, 36] 返回新的数组
+> 
+> ```
+
 - 数组归并方法 reduce() 和 reduceRight() 方法
+
+#### 9. GET、GETTER、SET、SETTER
+
+- getter 是一种获得属性值的方法，负责查询值，它不带任何参数
+- setter是一种设置属性值的方法，值以参数的形式传递，在他的函数体中，一切的return都是无效的
+- get/set访问器不是对象的属性，而是属性的特性，特性只有内部才用
+
+```js
+// set和get的使用
+var obj3 = {
+        a:100,
+        b:8,
+        set val(n){
+            this.a = n
+        },
+        get val2(){
+            return this.a
+        },
+    }
+
+    console.log(obj3.a)   //100
+    console.log(obj3.val2)   //100  此时还未赋值
+    obj3.val = 5
+    console.log(obj3.val2)   //5
+
+//setter和getter的使用
+
+```
+
+#### 10.浅拷贝与深拷贝
+
+##### 10.1 内存的分区
+
+分为四个区域：栈区（堆栈），堆区，全局静态区，只读区（常量区和代码区）。
+
+<img src="C:\Users\SFONE\AppData\Roaming\Typora\typora-user-images\image-20220401164824956.png" alt="image-20220401164824956" style="zoom:50%;" />
+
+1、栈区
+
+1. 存放的数据：局部变量，形参，被调用函数的地址（这个可以不用管）等等 
+
+2. 特点：
+
+   读取速度快，存储和释放的思路是按照数据结构中的栈进行的，存数据就是压栈，释放就是弹栈；
+
+   空间小，基本类型的数据占用空间的大小不会随着值的改变而改变，而且占用空间小。
+
+2、堆区：
+
+1. 存放数据：new出来的数据。
+
+2. 特点：
+
+   读取速度慢
+
+   空间大：引用类型的数据大小是动态的，会随着数据的增加而改变大小
+
+3、全局静态区：
+
+1. 存放数据：全局变量和静态变量
+
+2. 特点：在程序运行过程中，数据会一直在内存中。
+
+4、只读区：
+
+1. 存放数据：常量区存放常量，代码区存放程序的代码（程序运行时是需要载入到内存中允许的）
+
+2. 特点：此区域的数据在程序运行过程中肯定不能改变。
+
+##### 10.2 浅拷贝与深拷贝
+
+```js
+var p = {
+	"id":"007",
+	"name":"刘德华",
+	"books":new Array("三国演义","红楼梦","水浒传")//这是引用类型
+}
+
+//浅拷贝
+var p2 = {};
+for(let key in p){
+	p2[key] = p[key];	
+}
+p2.books[0] ="四国";
+console.log(p2);   //“四国”，"红楼梦","水浒传"
+console.log(p);   //“四国”，"红楼梦","水浒传"    //因为两者的books仍指向同一个内存地址，一改则全改
+
+//深拷贝
+var p2 = {};
+for(let key in p){
+	if(typeof p[key]=='object'){
+		p2[key]=[];//因为,我上面写的是数组,所以,暂时赋值一个空数组.
+		for(let i in p[key]){
+			p2[key][i] = p[key][i]
+		}
+	}else{
+		p2[key] = p[key];
+	}
+}
+p2.books[0] ="四国";
+console.log(p2);  //“四国”，"红楼梦","水浒传"
+console.log(p);  // "三国演义","红楼梦","水浒传"
+
+//深拷贝：如果属性都是json对象，则采用递归方式
+var p = {
+	"id":"007",
+	"name":"刘德华",
+	"wife":{
+		"id":"008",
+		"name":"刘德的妻子",
+		"address":{
+			"city":"北京",
+			"area":"海淀区"
+		}
+	}
+}
+ 
+//写函数
+function copyObj(obj){
+	let newObj={};
+	for(let key in obj){
+		if(typeof obj[key] =='object'){//如:key是引用类型,那就递归
+			newObj[key] = copyObj(obj[key])
+		}else{//基本类型,直接赋值
+			newObj[key] = obj[key];
+		}
+	}
+	return newObj;
+}
+ 
+let pNew = copyObj(p);
+pNew.wife.name="张三疯";
+pNew.wife.address.city = "香港";
+console.log(pNew);
+console.log(p);
+```
+
+#### 11.事件监听addEventListener()
+
+- **EventTarget  . addEventListener()** 方法将指定的监听器注册到 EventTarget 上，当该对象触发指定的事件时，指定的回调函数就会被执行。 事件目标可以是一个文档上的元素 Element，Document和Window或者任何其他支持事件的对象。
+
+- addEventListener()的工作原理是将实现EventListener的函数或对象添加到调用它的EventTarget上的指定事件类型的事件侦听器列表中。
+
+```js
+target.addEventListener(type, listener, options);
+target.addEventListener(type, listener, useCapture);
+target.addEventListener(type, listener, useCapture, wantsUntrusted); 
+document.getElementById("myBtn").addEventListener("click", function(){
+    document.getElementById("demo").innerHTML = "Hello World";
+});
+/*
+（1）type
+表示监听事件类型的字符串。
+（2）listener
+当所监听的事件类型触发时，会接收到一个事件通知（实现了 Event 接口的对象）对象。listener 必须是一个实现了 EventListener 接口的对象，或者是一个函数。
+（3）options 可选
+一个指定有关 listener 属性的可选参数对象。可用的选项如下：
+● capture:  Boolean，表示 listener 会在该类型的事件捕获阶段传播到该 EventTarget 时触发。
+● once:  Boolean，表示 listener 在添加之后最多只调用一次。如果是 true， listener 会在其被调用之后自动移除。
+● passive: Boolean，设置为true时，表示 listener 永远不会调用 preventDefault()。如果 listener 仍然调用了这个函数，客户端将会忽略它并抛出一个控制台警告。
+● signal：AbortSignal，该 AbortSignal 的 abort() 方法被调用时，监听器会被移除。
+（4）useCapture  可选
+Boolean，在DOM树中，注册了listener的元素， 是否要先于它下面的EventTarget，调用该listener。 当useCapture(设为true) 时，沿着DOM树向上冒泡的事件，不会触发listener。当一个元素嵌套了另一个元素，并且两个元素都对同一事件注册了一个处理函数时，所发生的事件冒泡和事件捕获是两种不同的事件传播方式。事件传播模式决定了元素以哪个顺序接收事件。如果没有指定， useCapture 默认为 false 。
+（5）wantsUntrusted 
+如果为 true , 则事件处理程序会接收网页自定义的事件。此参数只适用于 Gecko（chrome的默认值为true，其他常规网页的默认值为false），主要用于附加组件的代码和浏览器本身。
+*/
+```
+
+
 
 ## 四、ES6 
 
@@ -896,7 +1146,7 @@ console.log(arr)
 
 - 但对于引用类型的数据（主要是对象和数组）来说，变量指向数据的内存地址，保存的只是一个指针，const只能保证这个指针是固定不变的，至于它指向的数据结构是不是可变的，就完全不能控制了。
 
-#### 3.什么是arguments
+#### 3.arguments为什么是一个类数组而不是数组
 
 `arguments`是一个对应于传递给函数的参数的类数组对象，它的属性是从 0 开始依次递增的数字，还有`callee`和`length`等属性，与数组相似；但是它却没有数组常见的方法属性，如`forEach`, `reduce`等，所以它是一个**类数组**。
 
@@ -1062,6 +1312,53 @@ Math.max(...numbers); // 9
 
 #### 8.Proxy可以实现什么功能（待补充）
 
+在 Vue3.0 中通过 `Proxy` 来替换原本的 `Object.defineProperty` 来实现数据响应式。Proxy 是 ES6 中新增的功能，它可以用来自定义对象中的操作，实现getter和setter的以上所有内容（getter和setter是属性级别的拦截，代理是对象级别的拦截，功能更强大）。其中，getter负责获取值，不带任何参数；setter负责设置值，在它的函数体中，一些的return都是无效的
+
+
+
+##### 8.1 Proxy定义
+
+MDN定义：Proxy 对象用于定义基本操作的自定义行为（如属性查找，赋值，枚举，函数调用等）。
+
+通俗的讲Proxy是一个对象操作的拦截器，拦截对目标对象的操作，进行一些自定义的行为，一种分层的思想有点类似spring的AOP。
+
+需要实现一个 Vue 中的响应式，需要在 `get` 中收集依赖，在 `set` 派发更新，之所以 **Vue3.0 要使用 `Proxy` 替换原本的 API 原因在于 `Proxy` 无需一层层递归为每个属性添加代理，一次即可完成以上操作，性能上更好，并且原本的实现有一些数据更新不能监听到，但是 `Proxy` 可以完美监听到任何方式的数据改变**，唯一缺陷就是浏览器的兼容性不好。
+
+##### 8.2 Proxy的使用
+
+```js
+let p = new Proxy(target,handler)
+// target：用Proxy包装的目标对象（可以是任何类型的对象，包括原生数组，函数，甚至另一个代理）。
+// handler：自定义对象中的操作
+
+let test2={
+      name:'SFONE',
+      age:'24'
+}
+
+test2 = new Proxy(test2,{
+     get(target,key){
+          let result = target[key]
+          if( key === 'age' ){
+              result += '岁'
+          }
+          return result
+      },
+      set(target,key,value) {
+          if( key === 'age' && typeof value != Number){
+              throw Error('age字段必须为Number类型')
+          }
+   //Reflect.set()：在一个对象上设置一个属性。返回一个boolean值表示是否设置成功
+   // 异常时抛出TypeError，如果对象不是Object
+      return Reflect.set(target,key,value) 
+     }
+});
+  console.log(`我叫${test2.name}, 我今年${test2.age}了`)
+  test2.school = 'SWUST'
+  console.log(test2)   //Proxy {name: 'SFONE', age: '24', school: 'SWUST'}
+
+```
+
 #### 9.对象与数组的解构
 
 解构是 ES6 提供的一种新的提取数据的模式，这种模式能够从对象或数组里有针对性地拿到想要的数值。
@@ -1112,7 +1409,250 @@ const { classes:{ stu: { name } }} = school
 console.log( name )   //bob
 ````
 
+#### 11.对rest参数的理解
 
+扩展运算符被用在函数形参上时，**它还可以把一个分离的参数序列整合成一个数组**。这一点**经常用于获取函数的多余参数，或者像上面这样处理函数参数个数不确定的情况**
+
+```js
+function mutiple(...args) {
+    console.log(args)    //[1,2,3,4]
+  let result = 1;
+  for ( var val of args) {
+    result *= val;
+  }
+  return result;
+}
+mutiple(1, 2, 3, 4) // 24
+
+```
+
+#### 12.ES6中模板语法与字符串处理
+
+1. 模板字符串优点：
+
+- 允许用${}的方式嵌入变量
+- 在模板字符串中，空格、缩进、换行都会被保留
+- 模板字符串完全支持“运算”式的表达式，可以在${}里完成一些计算
+
+```js
+var name = 'css'   
+var career = 'coder' 
+var hobby = ['coding', 'writing']
+// ES5
+var finalString = 'my name is ' + name + ', I work as a ' + career + ', I love ' + hobby[0] + ' and ' + hobby[1]
+//ES6
+var finalString = `my name is ${name}, I work as a ${career} I love ${hobby[0]} and ${hobby[1]}`
+// 在模板字符串中写html代码
+let list = `               
+	<ul>
+		<li>列表项1</li>
+		<li>列表项2</li>
+	</ul>
+`;
+console.log(message); // 正确输出，不存在报错
+
+// 在模板字符串中进击一些简单的计算和调用
+function add(a, b) {
+  const finalString = `${a} + ${b} = ${a+b}`
+  console.log(finalString)
+}
+add(1, 2) // 输出 '1 + 2 = 3'
+
+```
+
+2.模板字符串中的一些方法
+
+```js
+//1.includes：判断字符串与子串的包含关系
+const son = 'haha' 
+const father = 'xixi haha hehe'
+father.includes(son) // true
+
+//2.startsWith：判断字符串是否以某个/某串字符开头
+const father = 'xixi haha hehe'
+father.startsWith('haha') // false
+father.startsWith('xixi') // true
+
+//3. endsWith：判断字符串是否以某个/某串字符结尾：
+const father = 'xixi haha hehe'
+father.endsWith('hehe') // true
+
+//4. 自动重复：可以使用 repeat 方法来使同一个字符串输出多次（被连续复制多次）：
+const sourceCode = 'repeat for 3 times;'
+const repeated = sourceCode.repeat(3) 
+console.log(repeated) // repeat for 3 times;repeat for 3 times;repeat for 3 times;
+
+```
+
+#### 13.ES6模块、CommonJS模块、AMD模块（重点关注，待补充）
+
+- CommonJS和ES6 Module都可以对引⼊的对象进⾏赋值，即对对象内部属性的值进⾏改变  
+- CommonJS是对模块的浅拷⻉，ES6 Module是对模块的引⽤，即ES6 Module只存只读，不能改变其值，也就是指针指向不能变，类似const；
+- 
+
+#### 14.尾调用（Tail Call）与尾递归
+
+尾调用：指某个函数的最后一步是调用另一个函数
+
+```js
+function f(x){
+  return g(x);
+}
+
+//下列均不属于尾调用
+// 情况一：
+function f(x){
+  let y = g(x);
+  return y;
+}
+
+// 情况二
+function f(x){
+  return g(x) + 1;
+}
+```
+
+尾递归：递归非常耗费内存，因为需要同时保存成千上百个调用记录，很容易发生"栈溢出"错误（stack overflow）。但对于尾递归来说，由于只存在一个调用记录，所以永远不会发生"栈溢出"错误，相对节省内存
+
+ES6的尾调用优化只在严格模式下开启，正常模式是无效的。这是因为在正常模式下，函数内部有两个变量，可以跟踪函数的调用栈。
+
+> - `arguments`：返回调用时函数的参数。
+> - `func.caller`：返回调用当前函数的那个函数。
+
+尾调用优化发生时，函数的调用栈会改写，因此上面两个变量就会失真。严格模式禁用这两个变量，所以尾调用模式仅在严格模式下生效。
+
+#### 15.严格模式（use strict）
+
+use strict 是一种 ECMAscript5 添加的（严格模式）运行模式，这种模式使得 Javascript 在更严格的条件下运行。设立严格模式的目的如下：
+
+- 消除 Javascript 语法的不合理、不严谨之处，减少怪异行为;
+- 消除代码运行的不安全之处，保证代码运行的安全；
+- 提高编译器效率，增加运行速度；
+- 为未来新版本的 Javascript 做好铺垫。
+
+区别：
+
+- 禁止使用 with 语句。
+- 禁止 this 关键字指向全局对象。
+- 对象不能有重名的属性。
+- ES6下的尾调用仅在严格模式下开启
+
+#### 16. for…in 和 for… of的区别
+
+for…of 是ES6新增的遍历方式，允许遍历一个含有**iterator接口**的数据结构（数组、对象等）并且返回各项的值，和ES3中的for…in的区别如下：
+
+- **for…of 遍历获取的是对象的键值，for…in 获取的是对象的键名**；
+- for… in 会遍历对象的整个原型链，性能非常差不推荐使用，而 for … of 只遍历当前对象不会遍历原型链；
+- 对于数组的遍历，for…in 会返回数组中所有可枚举的**属性**(包括原型链上可枚举的属性)，for…of 只返回数组的下标对应的属性值；
+
+**总结：**for...in 循环主要是为了遍历对象而生，不适用于遍历数组；for...of 循环可以用来遍历数组、类数组对象，字符串、Set、Map 以及 Generator 对象
+
+> **iterator**：原有的表示集合的数据结构，主要是数组和对象，ES6又添加了Map跟Set，Iterator是一种统一的接口机制，用来处理不同的数据结构
+>
+> - iterator是一种数据接口，为各种不同的数据结构提供统一的访问机制
+> - 任何数据结构只要部署了iterator接口，就称这种数据结构是可遍历的
+> - ES6规定，默认的iterator接口部署在数据结构的Symbol. iterator属性上
+> - 原生具备iterator接口的数据结构有：Array, Map, Set, TypedArray, 函数的arguements对象，NodeList对象
+
+#### 17.属性枚举顺序
+
+for…in循环、Object.keys()、Objcet.getOwnPrototypeNames()、Object.getOwnPrototypeSymbols、Object.assign在属性枚举方面有很大的差异性，for…in循环和Object.keys()的枚举顺序不确定，取决于JS引擎，可能因浏览器而异。Objcet.getOwnPrototypeNames()、Object.getOwnPrototypeSymbols、Object.assign()的枚举顺序是确定的。
+
+Object.values()返回对象值的数组，Object.entries()返回键/值对的数组
+
+#### 17.数据传输ajax/axios/fetch
+
+##### 17.1 AJAX
+
+AJAX是 Asynchronous JavaScript and XML 的缩写，指的是通过 JavaScript 的 异步通信，从服务器获取 XML 文档从中提取数据，再更新当前网页的对应部分，而不用刷新整个网页。通过在后台与服务器进行少量数据交换，Ajax 可以使网页实现异步更新。这意味着可以在不重新加载整个网页的情况下，对网页的某部分进行更新。传统的网页（不使用 Ajax）如果需要更新内容，必须重载整个网页页面。其缺点如下：
+
+- 本身是针对MVC编程，不符合前端MVVM的浪潮
+- 基于原生XHR开发，XHR本身的架构不清晰
+- 不符合关注分离（Separation of Concerns）的原则
+- 配置和调用方式非常混乱，而且基于事件的异步模型不友好。
+
+>  MVC,MVP,MVVM是三种常见的前端架构模式(Architectural Pattern),它通过分离关注点来改进代码组织方式。不同于设计模式(Design Pattern),只是为了解决一类问题而总结出的抽象方法，一种架构模式往往能使用多种设计模式。
+>
+>  MVC模式是MVP,MVVM模式的基础，这两种模式更像是MVC模式的优化改良版,他们三个的MV即Model，view相同，不同的是MV之间的纽带部分。本文主要介绍MVC与MVVM的应用与区别，因为MVP好像不是很常用。
+
+创建AJAX请求的步骤：
+
+- **创建一个 XMLHttpRequest 对象。**
+- 在这个对象上**使用 open 方法创建一个 HTTP 请求**，open 方法所需要的参数是请求的方法、请求的地址、是否异步和用户的认证信息。
+- 在发起请求前，可以为这个对象**添加一些信息和监听函数**。比如说可以通过 setRequestHeader 方法来为请求添加头信息。还可以为这个对象添加一个状态监听函数。一个 XMLHttpRequest 对象一共有 5 个状态，当它的状态变化时会触发onreadystatechange 事件，可以通过设置监听函数，来处理请求成功后的结果。当对象的 readyState 变为 4 的时候，代表服务器返回的数据接收完成，这个时候可以通过判断请求的状态，如果状态是 2xx 或者 304 的话则代表返回正常。这个时候就可以通过 response 中的数据来对页面进行更新了。
+- 当对象的属性和监听函数设置完成后，最后调**用 sent 方法来向服务器发起请求**，可以传入参数作为发送的数据体
+
+```js
+// promise 封装实现ajax：
+function getJSON(url) {
+  // 创建一个 promise 对象
+  let promise = new Promise(function(resolve, reject) {
+    let xhr = new XMLHttpRequest();
+    // 新建一个 http 请求
+    xhr.open("GET", url, true);
+    // 设置状态的监听函数
+    xhr.onreadystatechange = function() {
+      if (this.readyState !== 4) return;
+      // 当请求成功或失败时，改变 promise 的状态
+      if (this.status === 200) {
+        resolve(this.response);
+      } else {
+        reject(new Error(this.statusText));
+      }
+    };
+    // 设置错误监听函数
+    xhr.onerror = function() {
+      reject(new Error(this.statusText));
+    };
+    // 设置响应的数据类型
+    xhr.responseType = "json";
+    // 设置请求头信息
+    xhr.setRequestHeader("Accept", "application/json");
+    // 发送 http 请求
+    xhr.send(null);
+  });
+  return promise;
+}
+```
+
+
+
+##### 7.2  Fetch
+
+fetch号称是AJAX的替代品，是在ES6出现的，使用了ES6中的promise对象。Fetch是基于promise设计的。Fetch的代码结构比起ajax简单多。**fetch不是ajax的进一步封装，而是原生js，没有使用XMLHttpRequest对象**。
+
+fetch的优点：
+
+- 语法简洁，更加语义化
+- 基于标准 Promise 实现，支持 async/await
+- 更加底层，提供的API丰富（request, response）
+- 脱离了XHR，是ES规范里新的实现方式
+
+fetch的缺点：
+
+- fetch只对网络请求报错，对400，500都当做成功的请求，服务器返回 400，500 错误码时并不会 reject，只有网络错误这些导致请求不能完成时，fetch 才会被 reject。
+- fetch默认不会带cookie，需要添加配置项： fetch(url, {credentials: 'include'})
+- fetch不支持abort，不支持超时控制，使用setTimeout及Promise.reject的实现的超时控制并不能阻止请求过程继续在后台运行，造成了流量的浪费
+- fetch没有办法原生监测请求的进度，而XHR可以
+
+##### 7.3 Axios
+
+Axios 是一种基于Promise封装的HTTP客户端，其特点如下：
+
+- 浏览器端发起XMLHttpRequests请求
+- node端发起http请求
+- 支持Promise API
+- 监听请求和返回
+- 对请求和返回进行转化
+- 取消请求
+- 自动转换json数据
+- 客户端支持抵御XSRF攻击
+
+7.4 URL的转义
+
+- encodeURI 是对整个 URI 进行转义，将 URI 中的非法字符转换为合法字符，所以对于一些在 URI 中有特殊意义的字符不会进行转义。
+- encodeURIComponent 是对 URI 的组成部分进行转义，所以一些特殊字符也会得到转义。
+- escape 和 encodeURI 的作用相同，不过它们对于 unicode 编码为 0xff 之外字符的时候会有区别，escape 是直接在字符的 unicode 编码前加上 %u，而 encodeURI 首先会将字符转换为 UTF-8 的格式，再在每个字节前加上 %
 
 ## 五、原型与原型链 
 
@@ -1192,6 +1732,10 @@ console.log(Object.prototype.__proto__ === null) // true
     console.log(person.a)//123									// 虽然在构造函数中没有a属性，但是在其父函数（实例原型）中有该属性，所以构造																函数继承了a属性，仍能正常输出而不报错
     console.log(person.hasOwnProperty('a'));//false                // hasOwnProperty方法仅检查对象自身是否含有某属性，a属性是继承的，自身中没																 有，所以不能正常输出     
     console.log('a'in person)//true								// 若当前实例对象的构造函数中没有属性a时，in方法可以查询其父函数或祖父函数中																 是否有a属性，即查户口查到祖宗十八代去了，23333			
+
+
+//getPrototypeOf():返回参数内部特性Prototype的值
+console.log(Object.getPrototypeOf(person1) == Person.prototype)  //true
 ```
 
 #### 4.原型链指向
@@ -2327,9 +2871,309 @@ cancelAnimationFrame(1)
 
 ## 十、面向对象
 
+#### 1. 数据属性
 
+数据属性包含一个保存数据值的位置。值会从这个位置读取，也会写入到这个位置。数据属性共有4个特性（通过Object.definePrototype修改）：
 
+1. [[Configurable]]:表示数据是否可以通过delete删除并重新定义，是否可以修改它的特性以及是否可以将其改为访问器属性。默认情况下，为true。若定义该属性为false，则表示该属性不能从对象上删除
 
+2. [[ Enumberable ]] : 表示属性是否可以通过for..in循环。默认情况下为true
+
+3. [[ Writable ]]: 表示属性的值是否可以被修改，默认情况下为true。若设置为只读模式，则在严格模式下，修改该位置的属性会报错，非严格模式下则会忽略后续的赋值
+
+4. [[ Value ]]: 属性实际的值，默认为undefined
+
+   ```js
+   let person ={
+   	name:'SFONE'  //这里设置value为SFONE。 在严格模式下，尝试修改
+   }
+   ```
+
+#### 2.访问器属性
+
+访问器属性不包含数据属性，而是包含getter、setter函数。在读取访问器属性时，会调用getter函数，并返回一个有效的值，写入时，会调用setter函数并传入新值，共有4个属性：
+
+1. [[ Configurable ]]: 表示属性是否通过delete重新删除或定义，与上述相似
+
+2. [[ Enumberable ]]: 表示属性是否可以通过for..in循环。默认情况下为true
+
+3. [[get]]: 获取函数，默认为undefined
+
+4. [[set]]: 设置函数，默认为undefined
+
+   ```js
+   let person ={
+   	name:'SFONE'  //这里设置value为SFONE。 在严格模式下，尝试修改
+       age:'2018'
+   }
+   Objec.definePrototype(person,"age",{
+       get(){
+           return this.name
+       },
+       set(newvalue){
+           if(age>2017){
+               this.age = newvalue +1   
+           }
+       }
+   })
+   ```
+
+#### 3.创建对象的方法有哪些？
+
+ES5并没有正式支持面向对象的结构，比如类和继承，但是使用原型链可以模拟同样的行为。ES6正式支持类和继承。一般使用字面量的形式直接创建对象，但是这种创建方式对于创建大量相似对象的时候，会产生大量的重复代码。主要方式有：
+
+##### 3.1 工厂模式
+
+工厂模式的主要工作原理是用函数来封装创建对象的细节，从而通过调用函数来达到复用的目的。但是它有一个很大的问题就是创建出来的对象无法和某个类型联系起来，它只是简单的封装了复用代码，而没有建立起对象和类型间的关系。
+
+```js
+function createPerson(name,age,job){
+    let o = new Object();   // 显示的创建了对象
+    o.name = name
+    o.age = age;
+    o.job = job;
+    o.sayNmae = function(){
+        console.log( this.name) 
+    };
+    return o;
+}
+
+let person1 = createPerson('SFONE','24','Software Engineer')
+let person2 = createPerson('Grace','28','Software Engineer')
+// 这种工厂模式虽然解决创建多个类似对象的问题，但是没有解决对象标识问题
+```
+
+##### 3.2 构造函数模式
+
+构造函数模式相对于工厂模式的**优点**是，所创建的对象和构造函数建立起了联系，因此可以通过**原型**来识别对象的类型。但是构造函数存在一个**缺点**就是，造成了不必要的函数对象的创建，因为在 js 中函数也是一个对象，因此如果对象属性中如果包含函数的话，那么每次都会新建一个函数对象，浪费了不必要的内存空间，因为函数是所有的实例都可以通用的。
+
+与构造函数的区别：
+
+1. 没有显示的创建对象
+2. 属性和方法直接赋值给了this
+3. 没有return
+
+```js
+function Person(name,age,job){
+    this.name = name;
+    this.age = age;
+    this.job = job;
+    this.sayName = function(){
+        console.log(this.name)
+    };
+}
+
+let person1 = new Person('SFONE','24','Software Engineer')
+let person2 = new Person('Grace','28','Software Engineer')
+
+person1.sayName()  //SFONE
+person2.sayName()  //Grace
+```
+
+##### 3.3 原型模式
+
+因为每一个函数都有一个 prototype 属性，这个属性是一个对象，它包含了通过构造函数创建的所有实例都能共享的属性和方法。因此可以使用原型对象来添加公用属性和方法，从而实现代码的复用。这种方式相对于构造函数模式来说，解决了函数对象的复用问题。但是这种模式也存在一些问题，一个是没有办法通过传入参数来初始化值，另一个是如果存在一个引用类型如 Array 这样的值，那么所有的实例将共享一个对象，一个实例对引用类型值的改变会影响所有的实例
+
+```js
+function Person(){
+    Person.prototype.name = 'SFONE',
+    Person.prototype.age = 29,
+    Prson.prototype.sayName =  function(){
+        console.log(this.name)
+    }
+}
+
+//等价于
+function Person(){}
+Person.prototype.name = 'SFONE',
+Person.prototype.age = 29,
+Prson.prototype.sayName =  function(){
+     console.log(this.name)
+}
+
+let person1 = new Person()
+person1.sayName()
+
+let person2= new Person()
+person2.sayName()   //可以调用主要是由于对象查找机制，链式向上查找
+
+//1：原型和方法都添加到了Person的Prototype属性上（指向原型对象）。
+//2：默认情况下，所有原型对象自动获得一个constructor属性，指向与之关联的构造函数（Person.prototype.constructor 指向Person）
+//3： 自定义构造函数时，原型对象默认获得constructor属性，其他所有属性来源于Object。每次调用构造函数创建一个实例时，实例内部的[[prototype]]指针被赋值为构造函数原型对象。脚本中不能访问[[prototype]]，但chrome，firefox，Safari中会暴露_proto_属性，通过这个属性可以访问对象原型。
+```
+
+##### 3.4 组合使用构造函数和原型模式
+
+##### 3.5 动态原型模式
+
+##### 3.6 寄生构造函数
+
+#### 4.对象继承的方式
+
+##### 4.1 原型链
+
+这种实现方式存在的缺点是，在包含有引用类型的数据时，会被所有的实例对象所共享，容易造成修改的混乱。还有就是在创建子类型的时候不能向超类型传递参数。
+
+```js
+function Father(){
+      this.FatherName = "father's 构造函数";
+ }
+Father.prototype.age = 40;
+function Son(){
+    this.SonNname = "Son's 构造函数";
+}
+//Son的原型继承Father创建出来的对象，相当于继承了Father的全部内容，同时全部都存在Son__proto__属性里
+Son.prototype = new Father();
+Son.prototype.getSubValue = false;
+Son.prototype.age1 = 20;
+var example =new Son();
+console.log(example.age);
+ 
+```
+
+##### 4.2 构造函数
+
+使用call()和apply()将父类构造函数引入到子类函数,使用父类的构造函数来增强子类的实例,等同于复制父类的实例给子类, 所以子类的任何操作都不会影响到父类。
+
+这种方式是通过在子类型的函数中调用父类型的构造函数来实现的，这一种方法**解决了不能向父类型传递参数的缺点**，但是它存在的一个问题就是无法实现函数方法的复用，并且父类型原型定义的方法子类型也没有办法访问到。
+
+```js
+ function Father1(name){
+        this.name = name;
+        this.colors = ["red"];
+ }
+    Father1.prototype.sex = 1;
+ function Son1(name,age){
+      Father1.call(this,name);
+      //利用call改变this的指向将this指向父类中的name，这样就把Father中方法给引入到子类中了
+        this.age = age;
+ }
+var obj1 = new Son1("张三",25);
+obj1.colors.push("write");   //引用类型的也不会改变父类中的内容
+console.log(obj1.colors);// [red write]
+   
+var obj2= new Son1("jike",10);
+console.log(obj2.colors);//[red]
+console.log(obj2.sex);//undefined 无法继承到父类原型中的内容
+```
+
+##### 4.3 组合继承
+
+将原型链继承和构造函数继承这两种模式的有点组合在一起,通过调用父类构造,继承父类的属性并保留传参,然后通过将父类实例作为子类原型,实现函数复用，解决了上面的两种模式单独使用时的问题
+
+缺点：
+
+父类中的实例属性,方法即存在子类的实例中,也存在于子类的原型中,所以调用了两次超类的构造函数，造成了子类型的原型中多了很多不必要的属性，占内存
+
+```js
+function Father3(name){
+      this.name = name;
+      this.colors = ["red", "blue", "green"];
+}
+
+Father3.prototype.sayName=function(){
+      console.log(this.name);
+}
+
+function Son3(name,age){
+    //构造函数继承
+    Father3.call(this,name);   //继承this.name = name
+    this.age = age;
+ }
+
+//原型链继承
+Son3.prototype = new Father3();  //son3现在有name,color,sayname,重复继承了name
+var obj = new Son3("jike",25);
+console.log(obj);
+obj.sayName();//jike 可以调用父类的原型上的方法
+// obj.colors.push("write");
+
+var obj3 = new Son3("mike",30);
+obj3.colors.push("write");
+console.log(obj3.colors);//["red", "blue", "green", "write"]  不会修改原型中的color数组
+console.log(obj.colors);// ["red", "blue", "green"]
+```
+
+##### 4.4 原型式继承
+
+原型式继承的主要思路就是基于已有的对象来创建新的对象。 这种继承的思路主要不是为了实现创造一种新的类型，只是对某个对象实现一种简单继承
+
+重点:用一个函数包装一个对象,然后返回这个函数的调用,这个函数就变成了可以随意增添属性的实力或者对象. ES5中将object包装为object.create()方法
+
+```js
+function object(o) {   //封装一个函数，用来输出对象和承载继承的原型
+ function F() {}   //创建临时性构造函数，将传入的对象o作为这个构造函数的原型
+ F.prototype = o   //本质上，是对传入对象O执行了一次浅复制
+ return new F()   //最后返回这个临时类型的一个新实例
+}
+
+var person = { 
+ name: 'Gaosirs', 
+ friends: ['Shelby', 'Court'] 
+} 
+var anotherPerson = object(person) 
+console.log(anotherPerson.friends) // ['Shelby', 'Court']  
+//和原型链继承一样,同样是将自身的对象原型继承一个完整的对象,也可以说是将一个对象作为自身的原型对象,对于引用类型的数据一样继承的是引用地址,那么一个子实例对引用类型的数据进行操作的话,所有实例都会受到影响.
+```
+
+##### 4.5 寄生式继承
+
+寄生式继承的思路是创建一个用于封装继承过程的函数，通过传入一个对象，复制一个对象的副本，然后对象进行扩展，最后返回这个对象。这个扩展的过程就可以理解是一种继承,和工厂模式类似
+
+这种继承的优点就是一个简单对象实现继承，如果这个对象不是自定义类型时。缺点是没有办法实现函数的复用，效率降低
+
+```js
+function createAnother(o) {  //封装继承过程的函数
+ var clone = Object.create(o) // 创建一个新对象 
+ clone.sayHi = function() { // 添加方法 
+ console.log('hi') 
+ } 
+ return clone // 返回这个对象 
+} 
+var person = { 
+ name: 'GaoSirs'
+} 
+var anotherPeson = createAnother(person) 
+anotherPeson.sayHi()
+```
+
+##### 4.6 寄生式组合继承
+
+在前面说的组合模式(原型链+构造函数)中，继承的时候需要调用两次父类构造函数，导致添加了不必要的原型属性。使用寄生组合式继承，可以规避这些问题。这种模式通过借用构造函数来继承属性，通过原型链的形式来继承方法。本质上就是使用寄生式继承来继承父类的原型，在将结果指定给子类型的原型。
+
+优点：只调用了一次 supertype 构造函数，因此避免在subtype.prototype上创建不必要的，多余的属性，与此同时，原型链还能保持不变，还能正常使用instanceof 和isPrototypeOf()，因此，寄生组合式继承被认为是引用类型最理想的继承范式
+
+```js
+//父类
+function SuperType(name) { 
+ this.name = name 
+ this.colors = ['red', 'blue', 'green'] 
+} 
+
+function SubType(name, job) { 
+ // 继承属性 
+ SuperType.call(this, name) 
+ this.job = job 
+} 
+
+//继承函数
+function inheritPrototype(subType, superType) { 
+ var prototype = Object.create(superType.prototype);  // 创建父类原型副本
+ prototype.constructor = subType；　　　　　　　　　　　　// 给创建副本添加constructor属性　　　　　　
+ subType.prototype = prototype；　　　　　　　　　　　　  // 将子类原型指向这个副本
+}
+
+SuperType.prototype.sayName = function () { 
+ console.log(this.name) 
+} 
+
+// 继承 
+inheritPrototype(SubType, SuperType) 
+var instance = new SubType('Gaosirs', 'student') 
+instance.sayName()
+```
+
+ 
 
 ## 十一、垃圾回收与内存泄漏
 
@@ -2392,11 +3236,9 @@ this相关知识点
 
 window 对象含有 location 对象、navigator 对象、screen 对象等子对象
 
+ MVC,MVP,MVVM
 
-
-
-
-
+关注分离（Separation of Concerns）的原则
 
 Modern.js
 
