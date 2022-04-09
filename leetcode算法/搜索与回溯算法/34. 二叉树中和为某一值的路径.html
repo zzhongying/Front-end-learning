@@ -9,7 +9,24 @@
 </body>
 <script>
     var pathSum = function(root, target) {
-
+        let res =[] //总结果
+        let sum = target
+        let path =[]  //每一次的path
+        function FindPath(root,target) {
+            if(!root) return []   //如果root为空，则返回空
+            path.push(root.val)
+            sum -= root.val
+            //如果满足条件，直接返回路径path
+            if( !root.left && !root.right && sum === 0 ){
+                //slice(0)深拷贝，将类数组对象转换为数组对象
+                res.push(path.slice(0))  //因为path是一个对象，需要深拷贝
+            }
+            FindPath(root.left,sum)
+            FindPath(root.right,sum)
+            path.pop()   //回溯
+        }
+        FindPath(root,target)
+        return res
     };
 </script>
 </html>
