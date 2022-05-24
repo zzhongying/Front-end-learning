@@ -9,7 +9,6 @@
 </body>
 <script>
 
-
     var isBalanced = function(root) {
         if( !root) return true
         var left = TreeNodeDeep(root.left)  //左子树节点深度
@@ -23,6 +22,7 @@
     var TreeNodeDeep = function (root) {
         if( !root ) return 0;
         else{
+            //一个二叉树的深度等于此树的左子树深度与右子树深度中的最大值+1
             return Math.max(TreeNodeDeep(root.left),TreeNodeDeep(root.right)) + 1
         }
     }

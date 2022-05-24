@@ -188,7 +188,7 @@ Vue则是通过Vue对象将数据和View完全分离开来了。对数据进行�
 
 v-cloak - 这个指令保持在元素上直到关联实例结束编译 -- 解决初始化慢到页面闪动的最佳实践。
 
-v-bind - 绑定属性，动态更新HTML元素上的属性。例如 v-bind:class。
+v-bind - 绑定属性，动态更新HTML元素上的属性。例如 v-bind:class。加上v-bind 表示绑定，“:to={ XXXX }”则是把括号内的内容当成语法解析，而不是对象数据
 
 v-on - 用于监听DOM事件。例如 v-on:click/v-on:keyup
 
@@ -416,21 +416,18 @@ beforeDestory/destoryed：在beforeDestory时，实例上所有的data和所有m
 
 **B：设置映射关系**
 
-例：配置路由const routers =[
+例：配置路由
 
+```js
+const routers =[
 {
-
   Path:‘/home’
-
   Component:对应的home组件
-
   Redirect：‘/TEST’重定向，默认展示
-
   //默认为hash模式，在创建实例模式中，设置mode：’history’即可定义为history模式。
-
   }
-
 ]
+```
 
 并使用<router-link to=’/home’replace（禁止返回后退）tag=”button” active-class（路由匹配成功时，自动设置router-link-active的class，可修改默认样式）>使用（router-link相当于一个a标签），
 
@@ -438,16 +435,8 @@ beforeDestory/destoryed：在beforeDestory时，实例上所有的data和所有m
 
 ### 3. vue-router路由模式有几种？
 
- 
-
-|      |                                                              |
-| ---- | ------------------------------------------------------------ |
-|      | ![img](file:///C:/Users/SFONE/AppData/Local/Temp/msohtmlclip1/01/clip_image002.jpg) |
-
 
 答：vue-router 有 3 种路由模式：hash、history、abstract。其中，3 种路由模式的说明如下：
-
-
 
 hash: 使用 URL hash 值来作路由。支持所有浏览器，包括不支持 HTML5 History Api 的浏览器；（实现原理自行补充），网页不存在刷新，不会重新请求资源。Location.hash = ‘XXX’
 
@@ -463,47 +452,66 @@ abstract: 支持所有 JavaScript 运行环境，如 Node.js 服务器端。如�
 
 答：在router目录下的index.js文件中，对path属性加上/:id。 使用router对象的params.id。（“：to”：写成对象形式，v-bind）
 
-<router-link **:to**=”’/user’+ userid”></>在computed中动态获取userid进行拼接
+```js
+<router-link **:to**=”’/user’+ userid”></> //在computed中动态获取userid进行拼接
+ <h2> {{ userid }} </h2>  //使用
+
+computed(){
+	userid(){
+		return this.$route.params.user    //获取当前活跃的路由
+	}
+}
+
+```
 
 Path中设置：path：‘/user/:userid’
 
 ### 5.vue-router实现路由懒加载（ 动态加载路由 ）
 
-答:路由懒加载：当打包构建应用的时候。Js包会变得非常大，影响页面加载。如果把不同路由对应的组件分割为不同的代码块，然后当路由被访问时才加载对应组件，这样更加高效
+**1.背景**：当打包构建应用的时候。Js包会变得非常大（路由中通常会定义很多不同的界面，这些页面最终是放在一个js文件中的，导致这个页面非常大），影响页面加载，甚至用户电脑还会出现短暂的空白
 
-三种方式
+**2.作用**：将路由对应的组件打包成一个个的js代码块，只有当这个路由被访问到时，才加载对应的组件
 
-第一种：Vue异步组件技术,异步加载. Vue-router配置路由, 使用Vue的异步组件技术, 可以实现按需加载 .但是,这种情况下一个组件生成一个js文件。
+**3.方式**：
 
- 
+- 第一种：Vue异步组件技术,异步加载. Vue-router配置路由, 使用Vue的异步组件技术, 可以实现按需加载 .但是,这种情况下一个组件生成一个js文件。
 
-|      |                                                              |
-| ---- | ------------------------------------------------------------ |
-|      | ![img](file:///C:/Users/SFONE/AppData/Local/Temp/msohtmlclip1/01/clip_image002.jpg) |
+- 第二种：路由懒加载(使用import，推荐)
 
+  ```js
+  const bundle = ()=> import('../components/bundle')   //路由懒加载的方式
+  import controls from "@/components/controls";       //非路由懒加载的方式
+  
+  const routes=[{
+      path: '/',
+      name:'Default',
+      redirect:'/home'   //请求根目录时，重定向到home页面下
+      }, {
+          path: '/clear_all',
+          name:'Bundle',
+          component: bundle   //路由懒加载的方式
+      },
+      {
+          path: '/login/:user',
+          name: 'login',
+          component: controls    //非路由懒加载的方式
+      }
+  ]
+  ```
 
-第二种：路由懒加载(使用import，推荐)。
+- 第三种：webpack提供的require.ensure()，vue-router配置路由，使用webpack的require. ensure技术，也可以实现按需加载。这种情况下，多个路由指定相同的chunkName，会合并打包成一个js文件。
 
+- 第四种：AMD写法
 
-
-第三种：webpack提供的require.ensure()，vue-router配置路由，使用webpack的require. ensure技术，也可以实现按需加载。这种情况下，多个路由指定相同的chunkName，会合并打包成一个js文件。
-
- 
-
-|      |                                                              |
-| ---- | ------------------------------------------------------------ |
-|      | ![img](file:///C:/Users/SFONE/AppData/Local/Temp/msohtmlclip1/01/clip_image004.jpg) |
-
-
-第四种：AMD写法
-
-
+  ```
+  const About = resolve => require(['../components/About.vue'],resolve)
+  ```
 
 ### 6.$route和 $router 的区别
 
-答：$router是在/router/index.js文件中定义的VueRouter的实例，在源码中为一个大类，有push、replace、to等方法（script标签中想要导航到不同的URL,使用$router.push方法。返回上一个历史history用$router.to(-1)）
+答：$router是在/router/index.js文件中定义的VueRouter的实例（**路由器**），在源码中为一个大类，有push、replace、to等方法（script标签中想要导航到不同的URL,使用$router.push方法。返回上一个历史history用$router.to(-1)）
 
-$route为当前router跳转对象。里面可以获取当前路由的name,path,query,parmas等。
+$route为当前router跳转对象（当前活跃路由）。里面可以获取当前路由的name,path,query,parmas等。
 
 ### 7.Vue-router跳转和location.href有什么区别
 
@@ -516,6 +524,19 @@ $route为当前router跳转对象。里面可以获取当前路由的name,path,q
 其实使用router跳转和使用history.pushState ()没什么差别的，因为vue-router就是用了history.pushState()，尤其是在history模式下。
 
 ### 8.路由全局导航守卫（拦截）
+
+**背景**：以一个需求为例：当窗口的title需要跟随路由的变化而变化时，可以使用生命周期函数，在开始创建组件时，就设置title，即
+
+```js
+export default{
+	name:"controls",
+	created(){
+		document.title = 'controls'
+	}
+}
+```
+
+这种方法需要跳转不同的路由组件，并设置每个组件的created函数，工作量大
 
 **目的：**监听路由的跳转过程，在某个监听函数中进行一些操作。
 
@@ -539,17 +560,33 @@ Router.beforeEach((to,from,next)=>{
 
 ### 9.路由的嵌套（子路由）
 
-在父级路由中定义children:[
+在父级路由中定义children
 
-  { path:’/news’,component:XXX},
+```js
+  {
+        path: '/login/:user',
+        name: 'login',
+        component: controls,    //非路由懒加载的方式， 由于controls有子路由，必须在该组件下设置router-view
+        children:[
+            {
+                path:'/',
+                redirect:'news'  // 默认下显示news
+            },
+            {
+                path:'news',
+                component:compare
+            },{
+                path:'about',
+                compent:sankey
+            }
+        ]
+    }
 
-{ path:’/messages’,component:XXX},
-
- 
-
-]
-
-<router-link :to="/home/users"></>
+//controls组件中添加如下内容：
+ <router-link to="/home/news" >news</router-link>
+ <router-link to="/home/about">about</router-link>
+ <router-view></router-view>
+```
 
 ### 10.路由的参数传递
 
@@ -565,43 +602,44 @@ Router.beforeEach((to,from,next)=>{
 
 **方法二：query类型(大量数据时适用，传入对象)**
 
-配置路由方式：/router，普通配置
+配置路由方式：/router，普通配置，
 
-传递方式：对象中使用query的key作为传递方式
+传递方式一：使用v-bind绑定to属性，使用活跃路由中的query参数获得数据
 
-传递后形成的路径：/router?id=123
+```js
+// App.vue中
+  <router-link :to="{ path: '/record', query:{ name:'why', age:'24', sex:'lady' }}">record</router-link>
 
-例：
+//record路由对应的组件中，直接使用$route.query调用
+    <h3> { $route.query } </h3>
 
-父子件<router-link ：to=”{ path:’/profile’,query:{name:’why’,age:’15’}}”>
 
-子组件获取：{{$route.query.name}}
+```
 
-在methods进行路由路径拼接：
+传递方式一：使用methods中的函数传递
 
-This.$router.push(‘/user’+ this.userId(组件中另一个方法))
+```js
+//App.vue中
+<button @click ='quert_data' ></button>
 
-也可拼接对象
-
-This.$router.push({
-
-  Path:’/user’,
-
-  Query:{
-
-  Name:’aaa’,
-
-  Age:17,
-
+//methods中
+query_data(){
+      this.$router.push( {
+        path:'/clear_all',
+        query:{
+          text:"这是通过methods中的函数传递的路由参数数据"
+        }
+      } )
 }
 
-})
+// 路由clear_all对应的组件中
+    <h3> { $route.query } </h3>           
+//注意：当其他路由活跃且也含有query属性时，会存在显示其他的路由内容
+```
 
 ### 11. 谈谈你对 keep-alive 的了解？
 
 答：<keep-alive></keep-alive>是 Vue 内置的一个组件，可以使被包含的组件保留状态，避免重新渲染，是一个抽象组件，在v页面渲染完成后不会被渲染成为一个DOM元素。其有以下特性：一般结合路由和动态组件一起使用，用于缓存组件；（例：router-view为一个全局组件，如果被包含在keep-alive中，所有路径匹配到的视图组件都会被缓存）
-
- 
 
 常用的两个属性 include、exclude，允许组件有条件的进行缓存（提供 include 和 exclude 属性，两者都支持字符串或正则表达式。include表示只有名称匹配的组件会被缓存，exclude表示任何名称匹配的组件都不会被缓存 ，其中 exclude 的优先级比 include高）。
 
@@ -624,6 +662,12 @@ This.$router.push({
 两个生命周期：activated/deactivated，用来得知当前组件是否处理活跃状态（对应两个钩子函数 activated 和 deactivated ，当组件被激活时，触发钩子函数 activated，当组件被移除时，触发钩子函数 deactivated。）
 
 keep-alive 运用了 LRU 算法，选择最近最久未使用的组件予以淘汰。
+
+### 12.路由的hash模式和history模式的区别
+
+### 13.对前端路由的理解
+
+
 
 ## 五、VUE数据传输相关
 
@@ -1118,6 +1162,7 @@ VUE中的虚拟DOM定义如下：              VUE创造虚拟DOM
 	<span> span1 </span>
 	<span> span2 </span>
 </div>
+
 
 ### 2.虚拟 DOM 实现原理？
 
