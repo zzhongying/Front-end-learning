@@ -1,5 +1,86 @@
 # VUE常见面试题
+## 零、基础补充
 
+### 1.发布-订阅模式
+
+**定义**：订阅发布模式定义了一种一对多的依赖关系，让多个订阅者对象同时监听某一个主题对象。这个主题对象在自身状态变化时，会通知所有订阅者对象，使它们能够自动更新自己的状态
+
+典型案例：在dom节点上绑定过事件函数，那么我们就曾经使用过发布-订阅模式。
+
+```js
+document.getElementById('test').addEventListener('click',function(){ alert(2)},fasle;)
+```
+
+我们订阅document.body上的click事件，当body被点击时，body便会向订阅者发布这个消息。
+
+VUE中的事件总线就是使用的发布订阅模式
+
+### 2.观察者模式
+
+目标者对象和观察者对象有相互依赖的关系，观察者对某个对象的状态进行观察，如果对象的状态发生改变，就会通知所有依赖这个对象的观察者。
+
+例：Vue中响应式数据变化是**观察者模式**。每个响应式属性都有**dep**，**dep**存放了依赖这个属性的**watcher**，**watcher**是观测数据变化的函数，如果数据发生变化，**dep**就会通知所有的观察者watcher去调用更新方法。每个watcher中也存放了dep，帮助watcher知道是哪个dep通知了自己
+
+### 2.数据劫持
+
+**定义：**给数据添加监听，一旦数据发生变化，就执行视图的修改操作，这个过程就是**数据劫持**。
+
+**双向绑定：**双向绑定其实就是，UI或者数据有一方做了修改，那么另外一个也会随着改变。视图驱动数据，这个很简单，我们只要绑定事件就可以，但是数据要怎么驱动视图呢？这里就需要去对数据做监听，我们通常称之为”数据劫持“。在每一次数据改变的时候，去执行更新视图的操作。（v-model是典型的双向绑定）
+
+### 3. MVP, MVC,MVVM
+
+#### 3.1 MVC
+
+- Model负责业务数据的存储以及相对于数据的操作。
+- View负责页面的显示逻辑。
+- Controller是view和model的纽带，当用户与页面产生交互时，controller中的时间触发器调用model层，完成对model的修改。model和view是观察者模式，当model发生变化时，通知并驱动view发生相应的改变。View捕获用户交互操作后直接转发给Contoller，后者**完成相应的UI逻辑**。如果需要涉及业务功能的调用，Contoller会直接**调用Model及修改Model状态**。Contoller也可以主动控制原View或创建新的View对用户交互操作予以响应。
+
+**缺点：**
+
+- 因为model通知view发生改变，所以View 层和 Model 层耦合在一起，当项目逻辑变得复杂的时候，可能会造成代码的混乱，并且可能会对代码的复用性造成一些问题
+- MVC中view层和controller层一般是一一对应的，这样view无法抽象复用，增加了冗余代码。
+
+<img src="C:\Users\SFONE\AppData\Roaming\Typora\typora-user-images\image-20220608151430320.png" alt="image-20220608151430320" style="zoom:67%;" />
+
+#### 3.2 MVP
+
+分为model，view和presenter。由于MVC中model和view存在耦合性问题，MVP使用presenter来解耦。MVP 模式中，View 层的接口暴露给了 Presenter， 因此可以在 Presenter 中将 Model 的变化和 View 的变化绑定在一起，以此来实现 View 和 Model 的同步更新。这样就实现了对 View 和 Model 的解耦，Presenter 还包含了其他的响应逻辑。**MVP中严格禁止View和Model间的直接交互**，必需通过Presenter来完成。Model的独立性得到了真正的体现，它不仅仅与可视化元素的呈现（View）无关，与UI处理逻辑也无关。使用MVP的应用是用户驱动而不是Model驱动，所以**Model不需要主动通知view**
+
+**缺点：**Presenter需要处理业务逻辑并且处理页面参数获取及显示更新，只适合小型项目，大项目会导致Presenter非常臃肿。（为了处理Presenter臃肿问题，于是有了VM的数据双向绑定，处理了获取和更新页面数据的问题。）
+
+<img src="C:\Users\SFONE\AppData\Roaming\Typora\typora-user-images\image-20220608151457210.png" alt="image-20220608151457210" style="zoom: 67%;" />
+
+#### 3.3 MVVM
+
+- Model： Model代表数据模型，数据和业务逻辑都在Model层中定义（JS中的ajax，axios）
+- View：代表UI视图，负责数据的展示（html，css），结构，布局，外观，响应式
+- ViewModel： 负责监听Model中数据的改变并且控制视图的更新，处理用户交互操作；（控制器controller由路由替代）
+
+MVVM 设计模式**将view层的布局控件和model层的数据通过中间桥梁viewModel实现双向绑定**，而view和model没有直接的交互，实现了view和model的解耦。Model和ViewModel之间的交互是双向的，因此视图的数据的变化会同时修改数据源，而数据源数据的变化也会立即反应到View上实现了 Model和View的数据自动同步，因此开发者只需要专注于数据的维护操作即可，而不需要自己操作DOM。Model和ViewModel之间的交互是双向的，因此视图的数据的变化会同时修改数据源，而数据源数据的变化也会立即反应到View上.
+
+PS: 数据驱动视图的重点是**如何知道数据变了**，只要知道数据变了，那么接下去的事都好处理。如何知道数据变了，就是通过`Object.defineProperty( )`对属性设置一个set函数，当数据改变了就会来触发这个函数，所以我们只要将一些需要更新的方法放在这里面就可以实现data更新view了。
+
+<img src="C:\Users\SFONE\AppData\Roaming\Typora\typora-user-images\image-20220608144136249.png" alt="image-20220608144136249" style="zoom: 50%;" />
+
+**优点：**
+
+- 数据双向绑：减少基础代码，提高开发效率（由vm层提供，vm是MVVM的核心）
+- 低耦合：视图（View）可以独立于Model变化和修改，一个ViewModel可以绑定到不同的"View"上，当View变化的时候Model可以不变，当Model变化的时候View也可以不变。
+- 可重用性：你可以把一些视图逻辑放在一个ViewModel里面，让很多view重用这段视图逻辑。
+- 独立开发：开发人员可以专注于业务逻辑和数据的开发（ViewModel），设计人员可以专注于页面设计，使用Expression Blend可以很容易设计界面并生成xml代码。
+- 界面测试：界面素来是比较难于测试的，而现在测试可以针对ViewModel来写。
+
+**缺点：**
+
+- ⼀个⼤的模块中model也会很⼤，虽然使⽤⽅便了也很容易保证了数据的⼀致性，但是⻓期持有，不释放内存就造成了花费更多的内存 。双向绑定增加了大量的内存开销，增加了程序的编译时间，项目越大内存开销越大。
+- 数据绑定使得 Bug 很难被调试。你看到界面异常了，有可能是你 View 的代码有 Bug，也可能是 Model 的代码有问题。数据绑定使得⼀个位置的Bug被快速传递到别的位置，要定位原始出问题的地⽅就变得不那么容易了。另外，数据绑定的声明是指令式地写在View的模版当中的，这些内容是没办法去打断点debug的 
+- 对于⼤型的图形应⽤程序，视图状态较多，ViewModel的构建和维护的成本都会⽐较⾼
+
+**总结：**
+
+- 在MVC中，View会直接从Model中读取数据而不是通过 Controller；View和 Controller之间存在多对一关系。
+- 在MVP中，View并不直接使用Model，它们之间的通信是通过Presenter (MVC中的Controller)来进行的，所有的交互都发生在Presenter内部；View和Presenter之间是一对一关系。
+- MVVM 模式基本上与 MVP 模式完全一致，唯一的区别是：MVVM采用双向绑定（data-binding）：View的变动，自动反映在 ViewModel，反之亦然。
 ## 一、VUE概念方面
 
 ### 1.VUE优点？
