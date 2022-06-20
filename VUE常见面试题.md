@@ -82,6 +82,366 @@ PS: 数据驱动视图的重点是**如何知道数据变了**，只要知道数
 - 在MVP中，View并不直接使用Model，它们之间的通信是通过Presenter (MVC中的Controller)来进行的，所有的交互都发生在Presenter内部；View和Presenter之间是一对一关系。
 - MVVM 模式基本上与 MVP 模式完全一致，唯一的区别是：MVVM采用双向绑定（data-binding）：View的变动，自动反映在 ViewModel，反之亦然。
 ## 一、VUE概念方面
+#### 1.1 基本原理（待补充）
+
+很重要，待补充
+
+核心思想是组件化和数据驱动
+
+#### 1.2 对VUE设计原则的理解
+
+- **渐进式JavaScript框架**：与其它大型框架不同的是，Vue被设计为可以**自底向上逐层应用**。Vue的核心库只关注视图层，不仅易于上手，还便于与第三方库或既有项目整合。另一方面，当与现代化的工具链以及各种支持类库结合使用时，Vue也完全能够为复杂的单页应用提供驱动。
+
+  >渐进式：**没有多做职责之外的事**，只做了自己该做的事，没有做不该做的事，仅此而已。更直白一点就是，用你想用或者能用的功能特性，你不想用的部分功能可以先不用。VUE不强求一次性接受并使用它的全部功能特性。
+
+- 易用性：vue提供数据响应式、声明式模板语法和基于配置的组件系统等核心特性。这些使我们只需要关注应用的核心业务即可，只要会写js、html和css就能轻松编写vue应用。
+
+- 灵活性：渐进式框架的最大优点就是灵活性，如果应用足够小，我们可能仅需要vue核心特性即可完成功能；随着应用规模不断扩大，我们才可能逐渐引入路由、状态管理、vue-cli等库和工具，不管是应用体积还是学习难度都是一个逐渐增加的平和曲线。
+
+- 高效性：超快的虚拟DOM和diﬀ算法使我们的应用拥有最佳的性能表现。追求高效的过程还在继续，vue3中引入Proxy对数据响应式改进以及编译器中对于静态内容编译的改进都会让vue更加高效。
+
+#### 1.3 优点
+
+- 轻量级框架：只关注视图层，是一个构建数据的视图集合，大小只有几十kb；
+- 简单易学：国人开发，中文文档，不存在语言障碍 ，易于理解和学习；
+- 双向数据绑定：保留了angular的特点，在数据操作方面更为简单；
+- 组件化：保留了react的优点，实现了html的封装和重用，在构建单页面应用方面有着独特的优势；
+- 视图，数据，结构分离：使数据的更改更为简单，不需要进行逻辑代码的修改，只需要操作数据就能完成相关操作；
+- 虚拟DOM：dom操作是非常耗费性能的， 不再使用原生的dom操作节点，极大解放dom操作，但具体操作的还是dom不过是换了另一种方式；
+- 运行速度更快:相比较与react而言，同样是操作虚拟dom，就性能而言，vue存在很大的优势。
+
+#### 1.4 常见的VUE性能优化方法
+
+**1.路由懒加载**：如果没有用懒加载，就会导致进入首页时需要加载的内容过多，时间过长，就会出现长时间的白屏，很不利于用户体验，SEO 也不友好
+
+```js
+const router = new VueRouter({routes:[
+    {
+        path:'/foo',
+        component:()=> import ('./Foo.vue')  //ES6写法
+        component:require('@/components/Foo.vue').default
+    }
+]})
+```
+
+**2.图片懒加载：**对于图片过多的页面，为了加速页面加载速度，所以很多时候我们需要将页面内未出现在可视区域内的图片先不做加载， 等到滚动到可视区域后再去加载。
+
+```html
+<img v-lazy='./static/img/1.png'>
+```
+
+**3.使用keep-alive缓存页面：**通过内置组件 `<keep-alive></keep-alive>` 来把组件缓存起来，在组件切换的时候不进行卸载，这样当再次返回的时候，就能从缓存中快速渲染，而不是重新渲染，以节省性能
+
+```html
+<tamplate>
+    <div>
+        <keep-alive> <child></child> </keep-alive>
+    </div>
+</tamplate>
+```
+
+**4.不同时使用v-if和v-for**：如果必须使用，则将v-if放在v-for的外围
+
+```html
+<template>
+    <ul v-if = 'isAcitve'>
+        <li v-for='user in activeUser'> {{ user.name }} </li>
+    </ul>
+</template>
+```
+
+**5.第三方组件按需插入**：像element-ui或者bootstrap按需引入
+
+```js
+import { Button, Select } from 'element-ui';
+```
+
+**6.使用v-show复用组件，而不是v-if。**当DOM结构越复杂，使用v-show的受益就越大。不过它也有劣势，就是 v-show 在一开始的时候，所有分支内部的组件都会渲染，对应的生命周期钩子函数都会执行，而 v-if 只会加载判断条件命中的组件，所以需要根据不同场景使用合适的指令
+
+```html
+<template>
+  <div class="cell">
+     <!--这种情况用v-show复用DOM，比v-if效果好-->
+     <div v-show="value" class="on">
+        <Heavy :n="10000"/>
+     </div>
+     <section v-show="!value" class="off">
+        <Heavy :n="10000"/>
+     </section>
+  </div>
+</template>
+```
+
+**7.将无状态的组件设置为函数组件：**对应一些纯展示，没有响应数据，没有状态管理，也不用生命周期钩子函数的组件，我们可以设置为函数式组件，提高渲染性能，因为会把它当成一个函数来处理，所以开销很低。
+
+**原理**：在 `patch` 过程中对于函数式组件的 `render` 生成的虚拟 DOM，不会有递归子组件初始化的过程，所以渲染开销会低很多
+
+它可以接受 `props`，但是由于不会创建实例，所以内部不能使用 `this.xx` 获取组件属性
+
+```html
+<template functional>
+	<div class="cell">
+		<div v-if="props.value" class="on"></div>
+		<section v-else class="off"></section>
+	</div>
+</template>
+
+
+<script>
+	export default { props: ['value'] }
+</script>
+```
+
+**8.长列表性能优化：**
+
+- 如果列表是纯粹的数据展示，不会有任何改变，就不需要做响应话，比如使用 `Object.freeze()` 冻结一个对象，[MDN的描述是](https://link.segmentfault.com/?enc=4yGqHaTlBDigUjEDX97Agw%3D%3D.YUJvi6K%2FhSE4wvpvuupM8bSRTSX3P1ASR3V%2BnUceo%2FdPeIrnri2%2BkrCFxXqPj03dPkOE0pUBXlVMT%2BH24SW%2F%2BITo022qTYd6qomuTs3mBgzK9DJYn5ldqGUm5Aw2kpUD) 该方法冻结的对象不能被修改；即不能向这个对象添加新属性，不能删除已有属性，不能修改该对象已有属性的可枚举性、可配置性、可写性，以及不能修改已有属性的值，以及该对象的原型也不能被修改
+
+- 如果是⼤数据⻓列表，可采⽤虚拟滚动，只渲染少部分(可视区域)区域的内容。原理是监听滚动事件，动态更新需要显示的 DOM，并计算出在视图中的位移，这也意味着在滚动过程需要实时计算，有一定成本，所以如果数据量不是很大的情况下，用普通的滚动就行
+
+```JS
+<recycle-scroller
+  class="items"
+  :items="items"
+  :item-size="24"
+>
+  <template v-slot="{ item }">
+    <FetchItemView
+      :item="item"
+      @vote="voteItem(item)"
+    />
+  </template>
+</recycle-scroller>
+```
+
+**9.列表使用唯一key：**这样以后是添加一个值，而不是全部重新渲染
+
+**10.变量本地化：**把多次引用的变量保存起来，因为每次访问 `this.xx` 的时候，由于是响应式对象，所以每次都会触发 `getter`，然后执行依赖收集的相关代码，如果使用变量次数越多，性能自然就越差
+
+```js
+<template> 
+ <div :style="{ opacity: number / 100 }"> {{ result
+}}</div>
+</template>
+<script>
+import { someThing } from '@/utils'
+export default {
+ props: ['number'], 
+ computed: {  
+  base () { return 100 },  
+  result () {   
+   let base = this.base, number = this.number 
+   // 保存起来    
+  for (let i = 0; i < 1000; i++) {   
+   number += someThing(base) // 避免频繁引用
+this.xx   
+  }   
+   return number 
+  }
+}
+}
+</script>
+```
+
+**11.事件的销毁**：Vue 组件销毁时，会自动解绑它的全部指令及事件监听器，但是仅限于组件本身的事件
+
+而对于`定时器`、`addEventListener` 注册的监听器等，就需要在组件销毁的生命周期钩子中手动销毁或解绑，以避免内存泄露
+
+**12.子组件优化**：为了避免父组件向子组件频繁传值，造成子组件中不必要的部分频繁渲染，可使用两个方法：
+
+- 使用计算属性 computed
+- 将子组件中的内容再拆分为子组件
+
+**13.Vue-SSR**
+
+### 1.理解Dep和watcher
+
+watcher分为三种，但是任何类型的`Watcher`都是基于`数据响应式`的，也就是说，要想实现`Watcher`，就需要先实现`数据响应式`，而`数据响应式`的原理就是通过`Object.defineProperty`去劫持变量的`get`和`set`属性：
+
+- `渲染Watcher`：变量修改时，负责通知HTML里的**重新渲染 **
+
+- `computed Watcher`：变量修改时，负责通知computed里依赖此变量的computed**属性变量**的修改
+
+- `user Watcher`：变量修改时，负责通知watch属性里所对应的**变量函数**的执行。
+- 
+
+### 2.Vue的响应数据绑定原理
+
+VUE 采用MVVM模式实现双向绑定，所以涉及到MVVM中View和Model的双向绑定操作，而数据驱动视图需要使用到“数据劫持”。在VUE2.X中，数据劫持通过`Object.defineProperty`来实现，VUE3.X中使用Proxy实现对象的监听。两者都是通过数据劫持和发布-订阅者模式的方式实现双向绑定。
+
+#### 2.1 Vue2.X
+
+![VUE中的双向绑定](F:\面试相关\面试题总结\图片\VUE中的双向绑定.png)
+
+几个重要模块：
+
+- `Observer`: 发布者，递归地监听对象上的所有属性，在属性值改变的时候，触发相应的`Watcher`。将数据进行劫持，使用`Object.defineProperty`对属性进行重定义
+- `Watcher`: 订阅者，当监听的数据值修改时，执行响应的回调函数，在`Vue`里面的更新模板内容。
+- `Dep`: 订阅者列表，链接`Observer`和`Watcher`的桥梁，每一个`Observer`对应一个`Dep`。是一个记录以来关系的，有一个内部数组subs，记录所有依赖的watcher。
+
+`Observer`中进行响应式的绑定，在数据被读的时候，触发`get`方法，执行`Dep`来收集依赖，也就是收集`Watcher`。在数据被改的时候，触发`set`方法，通过对应的所有依赖(`Watcher`)，去执行更新。比如`watch`和`computed`就执行开发者自定义的回调方法。
+
+双向原理的步骤：
+
+在VUE中需要遍历所有data**对象**中的所有属性，对每个属性均使用`Object.defineProperty`，即可实现双向绑定。关键内容：
+
+**原理**：Vue.js 是采用**数据劫持结合发布者-订阅者模式**的方式实现双向绑定。主要分为以下几个步骤：
+
+1. 需要observe的数据对象进行递归遍历，包括子属性对象的属性，使用`Object.defineProperty()`将监听的属性全部转为setter和getter。当给这个对象的某个值赋值，就会触发setter，那么就能监听到了数据变化
+2. compile解析模板指令，将模板中的变量替换成数据，然后初始化渲染页面视图，并将每个指令对应的节点绑定更新函数，添加监听数据的订阅者，一旦数据有变动，收到通知，更新视图
+3. 每个组件实例都有watcher对象，会在组件渲染的过程中把属性记录为依赖。Watcher订阅者是Observer和Compile之间通信的桥梁，主要做的事情是: 
+   - 在自身实例化时往属性订阅器(dep)里面添加自己 （订阅者），当dep发生变化时，通知watcher
+   - 自身必须有一个update()方法 
+   - 待属性变动，dep.notice()通知时，能调用自身的update()方法，重新计算，并触发Compile中绑定的回调，从而使关联的组件更新。
+4. 当watcher中依赖项的setter被调用时，会通知watcher重新计算，从而使关联的组件更新
+5. MVVM作为数据绑定的入口，整合Observer、Compile和Watcher三者，**通过Observer来监听自己的model数据变化，通过Compile来解析编译模板指令，最终利用Watcher搭起Observer和Compile之间的通信桥梁**，达到数据变化 -> 视图更新；视图交互变化(input) -> 数据model变更的双向绑定效果
+
+```js
+const data = {
+    name: '你不知道滴前端',
+    age: 25,
+    info: {
+        address: '北京'
+    },
+    numbers: [1, 2, 3, 4]
+};
+
+function observerObject(target, name, value) {   //参数分别表示：目标对象，目标对象中的属性，传入数据的类型
+    if (typeof value === 'object' || Array.isArray(target)) {   //如果传入的target是一个对象的话，则递归使用observer
+        observer(value);
+    }
+    Object.defineProperty(target, name, {         //如果传入的值不是对象，则执行对目标属性的描述符（实现双向绑定）
+        get() {
+            return value;
+        },
+        set(newVal) {
+            if (newVal !== value) {
+                if (typeof value === 'object' || Array.isArray(value)) {        //继续递归
+                    observer(value);
+                }
+                value = newVal;
+            }
+            renderView();                  //当目标类型为非对象时，准备修改属性内容时，执行renderView（执行视图渲染相关逻辑）                              
+        }
+    });
+}
+
+function observer(target) {                     
+    if (typeof target !== 'object' || !target) {   //传入的如果不是对象而是属性，则将其加入到监听中
+        return target;
+    }
+    for (const key in target) {                   //传入的是一个对象则递归调用 observe 遍历对象的每一个属性，确保 data 中的所有属性都加入监听。
+        if (target.hasOwnProperty(key)) {
+            const value = target[key];
+            observerObject(target, key, value);
+        }
+    }
+}
+observer(data);
+```
+
+`Object.defineProperty`的问题在于，只能够作用在对象上。如果在项目中**直接设置数组的某一项的值，或者直接设置对象的某个属性值，通过下标方式修改数组数据或者给对象新增属性**等，`Object.defineProperty`会监听不到这些变化，不能触发组件的重新渲染。因为 Object.defineProperty 不能拦截到这些操作。所以对数组进行数据劫持需要修改数组的原型方法，往这些方法里添加一些视图渲染的操作，或者调用splice()、 push()、pop()、shift()、unshift()、sort()、reverse()这几个方法，VUE在缓存了array的原型链，重写了原型，触发这些方法时会observe数据，让Object.definedProperty可以监听到这些数组操作。或者直接使用$set方法修改数组/对象中的内容
+
+```js
+const oldArrayProperty = Array.prototype;
+const newArrayProperty = Object.create(oldArrayProperty);    //是一种新的prototype
+['pop', 'push', 'shift', 'unshift', 'splice'].forEach((method) => {
+    newArrayProperty[method] = function() {
+        renderView();          //执行视图渲染相关逻辑
+        oldArrayProperty[method].call(this, ...arguments);   //call将oldArrayProperty[method]的this指向设置为 newArrayProperty[method]的this指向，就是给数组的每个方法添加一些视图渲染的操作
+    };
+});
+ // 在observer函数中加入数组的判断，如果传入的是数组，则改变数组的原型对象为我们修改过后的原型。
+    if (Array.isArray(target)) {
+        target.__proto__ = newArrayProperty;
+   }
+
+//使用$set方法修改数组/对象
+this.$set(this.arr, 0, "OBKoro1"); // 改变数组
+this.$set(this.obj, "c", "OBKoro1"); // 改变对象
+```
+
+**object.definedProtery的缺陷：**
+
+- 递归遍历所有的对象属性，当数据层级比较深的话，很耗费性能
+- 虽然也能应用在数组上，但是需要修改数据的原型方法
+- 只能够监听定义时的属性，不能监听新加的属性，这也就是为什么在vue中要使用Vue.set的原因，删除也是同理
+
+Vue.$set的实现原理：
+
+- 如果目标是数组，直接使用数组的 splice 方法触发响应式；
+- 如果目标是对象，会先判读属性是否存在、对象是否是响应式，最终如果要对属性进行响应式处理，则是通过调用 defineReactive 方法进行响应式处理（ defineReactive 方法就是 Vue 在初始化对象时，给对象属性采用 Object.defineProperty 动态添加 getter 和 setter 的功能所调用的方法
+
+#### 2.2 Vue3.X
+
+在vue3版本中，使用了proxy实现对象的监听，可以理解成，在目标对象之前架设一层“拦截”，外界对该对象的访问，都必须先通过这层拦截，因此提供了一种机制，可以对外界的访问进行过滤和改写。
+
+**Refleact:**
+
+Reflect是一个内建的对象，用来提供方法拦截JavaScript的操作。Reflect的所有属性和方法都是静态的(目前共有13个静态方法)，让Object操作都变成函数行为。
+
+- Reflect不是一个函数对象，所以它是不可构造的，也就是说它不是一个构造器，不能通过new操作符去新建或者将其作为一个函数去调用Reflect对象。
+- Reflect对象的方法与Proxy对象的方法一一对应，只要是Proxy对象的方法，就能在Reflect对象上找到对应的方法。
+- 修改某些Object方法的返回结果，让其变得更规范化。如Object.defineProperty(obj, name, desc)在无法定义属性时，会抛出一个错误，而Reflect.defineProperty (obj, name, desc)则会返回false。
+
+**优点：**
+
+- proxy可以直接监听数组的修改
+- proxy可以直接监听属性的新增和删除
+- 在实现深度监听的时候，只有在data对象的属性被访问的时候，才去对这个属性做监听处理，而不是一次性递归所有的。
+
+**缺点：**
+
+存在兼容性问题，因为Proxy使用ES6
+
+```js
+function observe(target) {
+    if (typeof target !== 'object' || target == null) {    //如果传入类型不是对象的话，则将该传入参数加入监听列表
+        return target;
+    }
+    const obseved = new Proxy(target, {        //如果传入类型是对象的话
+        get(target, key, receiver) {
+            //只有在data对象的属性被访问时，才对这个属性做监听处理
+           return observe(Reflect.get(target, key, receiver);)  //如果是get方法，则递归，直至target不是object类型
+            //获取对象身上某个属性的值，类似于 target[name]。如果没有该属性，则返回undefined。
+        },
+        set(target, key, value, receiver) {
+            if (value === target[key]) {
+                return true;
+            }
+            const ownKeys = Reflect.ownKeys(target);   //返回一个包含所有自身属性（不包含继承属性）的数组。(类似于 Object.keys(), 但不会受enumerable影响, Object.keys返回所有可枚举属性的字符串数组).
+            if (ownKeys.includes(key)) {
+                console.log('旧属性');
+            } else {
+                console.log('新添加的属性');
+           		return Reflect.set(target, key, value, receiver)
+        	},
+         deleteProperty(target, key) {
+           return result  Reflect.deleteProperty(target, key);
+        }
+    });
+    return obseved;
+}
+
+
+
+const data = {
+    name: '你不知道的前端',
+    age: 25,
+    info: {
+        city:'beijing'
+    }，
+    numbers: [1, 2, 3, 4]
+};
+const proxyData = observe(data)
+```
+
+### 2.VUE的两个核心点
+
+答：数据驱动、组件系统
+
+数据驱动：ViewModel，保证数据和视图的一致性。
+
+组件系统：应用类UI可以看作全部是由组件树构成的。
 
 ### 1.VUE优点？
 
